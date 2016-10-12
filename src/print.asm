@@ -1,38 +1,34 @@
+[bits 32]
 
-; Prints the string at address bx
+VIDEO_MEM equ 0xb8000
+WHITE_ON_BLACK equ 0x0f
+
 print:
-        ; Push all registers to the stack
         pusha
-        start:
+
+        ; Load address of video memory
+        mov edx, VIDEO_MEM
+        print_loop:
                 ; Load the next character
-                mov al, [bx]
+                mov al, [ebx]
+
                 ; Check for '\0'
                 cmp al, 0
-                je done
+                je print_end
 
-                ; Print the character (using the BIOS)
-                mov ah, 0x0e
-                int 0x10
+                ; Set color for character
+                mov ah, WHITE_ON_BLACK
+                ; Store character to video memory
+                mov [edx], ax
 
-                ; Advance to next character
-                inc bx
-                jmp start
-        done:
-        ; Pop all registers
-        popa
-        ret
+                ; advance to next character
+                inc ebx
+                ; increment video memory address
+                ; each character in video memory is 2 bytes
+                add edx, 2
 
-; Print \n\r
-printnl:
-        pusha
+                jmp print_loop
 
-        mov ah, 0x0e
-        ; '\n'
-        mov al, 0x0a
-        int 0x10
-        ; '\r'
-        mov al, 0x0d
-        int 0x10
-
+        print_end:
         popa
         ret
