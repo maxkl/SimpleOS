@@ -1,21 +1,19 @@
+; Base address of the boot sector
+[org 0x7c00]
+
 ; TTY mode
 mov ah, 0x0e
-; Character to print
-mov al, 'A'
-; General interrupt for video services
-int 0x10
-mov al, 's'
-int 0x10
-mov al, 'd'
-int 0x10
-mov al, 'f'
+
+; Print what resides at the label
+mov al, [the_secret]
 int 0x10
 
-; Jump to the current address (infinite loop)
-jmp $
+jmp $ ; infinite loop
 
-; Fill with 510 times 00 minus the prevoius code
+the_secret:
+    db 'X'
+
+; Zero padding
 times 510 - ($-$$) db 0
-
-; Magic number
+; Magic bios number
 dw 0xaa55
