@@ -1,48 +1,39 @@
-; TTY mode
-mov ah, 0x0e
 
-; cs -> Code Segment
-; ds -> Data Segment
-; ss -> Stack Segment
-; es -> Extra Segment
-; fs, gs -> General Purpose Segments
+; Boot sector offset
+[org 0x7c00]
 
-; This implicitly uses ds as the segment (ds:the_secret)
-; ds is 0x0000 initially so we are accessing 0x0000:the_secret
-mov al, [the_secret]
-int 0x10
+; Set up stack at 0x8000
+mov bp, 0x8000
+mov sp, bp
 
-; Set ds to the right value
-; the segment address is left-shifted 4 bits, so the segment really starts at 0x7c00
-; also, the segment registers can not be mov'ed to so we have to use an intermediate register
-mov bx, 0x7c0
-mov ds, bx
+mov bx, 0x9000
+mov dh, 2
+call disk_load
 
-; Now try again, this should work
-mov al, [the_secret]
-int 0x10
+; Print first loaded word
+mov dx, [0x9000]
+call hexprint
+call printnl
 
-; Explicitly select es as the segment
-; es is 0x0000, so we are essentially accessing 0x0000:the_secret
-mov al, [es:the_secret]
-int 0x10
-
-; Set es to the correct value so that es:the_secret really points to the_secret
-mov bx, 0x7c0
-mov es, bx
-
-; Print the_secret using es as the segment
-; this should work, too
-mov al, [es:the_secret]
-int 0x10
+; Print first loaded word of second sector
+mov dx, [0x9000 + 512]
+call hexprint
+call printnl
 
 ; Infinite loop
 jmp $
 
-; Data
-the_secret: db 'X'
+%include "print.asm"
+%include "hexprint.asm"
+%include "disk.asm"
 
 ; Zero padding
 times 510 - ($-$$) db 0
 ; Magic bios number
 dw 0xaa55
+
+; Some data so that we have something to read
+; Sector 2
+times 256 dw 0xdada
+; Sector 3
+times 256 dw 0xface
