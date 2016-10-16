@@ -1,0 +1,2 @@
+
+srcs += kernel/kernel.c

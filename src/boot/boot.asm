@@ -18,10 +18,10 @@ call load_kernel
 ; Enter protected mode (this never returns)
 call enter_pm
 
-%include "print.asm"
-%include "disk.asm"
-%include "gdt.asm"
-%include "protected-mode.asm"
+%include "boot/print.asm"
+%include "boot/disk.asm"
+%include "boot/gdt.asm"
+%include "boot/protected-mode.asm"
 
 [bits 16]
 load_kernel:
